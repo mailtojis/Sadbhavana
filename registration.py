@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from io import BytesIO
+import base64
 import random
 import os
 
@@ -15,88 +16,78 @@ EMAIL_ADDRESS = "jisthottam@gmail.com"
 EMAIL_PASSWORD = "weac teal rdhv hpxk"
 
 
-# Custom CSS to make the image stretch to the bottom of the column
+# Function to convert image file to base64
+def get_base64_image(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+# Convert the banner image to base64
+image_base64 = get_base64_image("image/S24.png")
+
+# Embed the image in HTML
 st.markdown(
-    """
+    f"""
     <style>
-    .full-height-image img {
-        height: 200vh;
-        object-fit: cover;
-    }
+        .side-by-side {{
+            display: flex;
+            align-items: center;
+        }}
+        .side-by-side img {{
+            max-width: 50%;
+            height: 20%;
+        }}
+        .registration-form {{
+            width: 70%;
+            padding: 10px;
+        }}
     </style>
+    <div class="side-by-side">
+        <div><img src="data:image/png;base64,{image_base64}" alt="Banner"></div>
+        <div class="registration-form">
     """,
     unsafe_allow_html=True
 )
 
-# Create two columns for the image and the form
-col1, col2 = st.columns([1, 2])  # Adjust column ratios as needed
+# Form for user registration
+st.title("Registration Page")
+if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
+    st.error("Email credentials are not set.")
+else:
+    with st.form("registration_form"):
+        name = st.text_input("Name", max_chars=50)
+        mobile = st.text_input("Mobile Number", max_chars=10)
+        email = st.text_input("Email")
+        emirates = st.selectbox("Select Emirate", ["", "Abu Dhabi", "Dubai", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah", "Umm Al Quwain"])
+        submit_button = st.form_submit_button("Register")
+        
+        if submit_button:
+            if not name or not mobile or not email or emirates == "":
+                st.error("Please fill in all fields.")
+            else:
+                registration_number = f"REG-{random.randint(1000, 9999)}"
+                qr_data = f"Registration Number: {registration_number}\nName: {name}\nMobile: {mobile}\nEmirate: {emirates}"
+                qr = qrcode.make(qr_data)
+                buffered = BytesIO()
+                qr.save(buffered, format="PNG")
+                qr_image = buffered.getvalue()
+                
+                try:
+                    msg = MIMEMultipart()
+                    msg['From'] = EMAIL_ADDRESS
+                    msg['To'] = email
+                    msg['Subject'] = "Registration Confirmation"
+                    body = f"<h2>Registration Confirmation</h2><p>Thank you, {name}, for registering.</p><p>Your Registration Number is: <strong>{registration_number}</strong></p>"
+                    msg.attach(MIMEText(body, 'html'))
+                    image = MIMEImage(qr_image)
+                    image.add_header('Content-ID', '<qrcode>')
+                    msg.attach(image)
+                    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+                        server.starttls()
+                        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+                        server.send_message(msg)
+                    st.success("Registration successful! A confirmation email has been sent.")
+                except Exception as e:
+                    st.error(f"Failed to send email: {e}")
 
-# Left column: Display the banner image with custom CSS class
-with col1:
-    st.markdown('<div class="full-height-image">', unsafe_allow_html=True)
-    st.image("image/S24.png", use_column_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# Right column: Registration form
-with col2:
-    st.title("Registration Page")
-
-    # Check if email credentials are set
-    if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
-        st.error("Email credentials are not set. Please set EMAIL_ADDRESS and EMAIL_PASSWORD as environment variables.")
-    else:
-        # Form for user registration
-        with st.form("registration_form"):
-            # Mandatory fields
-            name = st.text_input("Name", max_chars=50)
-            mobile = st.text_input("Mobile Number", max_chars=10)
-            email = st.text_input("Email")
-            emirates = st.selectbox("Select Emirate", 
-                                    ["", "Abu Dhabi", "Dubai", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah", "Umm Al Quwain"])
-            
-            # Submit button
-            submit_button = st.form_submit_button("Register")
-            
-            if submit_button:
-                if not name or not mobile or not email or emirates == "":
-                    st.error("Please fill in all fields.")
-                else:
-                    # Generate a unique registration number
-                    registration_number = f"REG-{random.randint(1000, 9999)}"
-                    
-                    # Generate QR Code with registration details
-                    qr_data = f"Registration Number: {registration_number}\nName: {name}\nMobile: {mobile}\nEmirate: {emirates}"
-                    qr = qrcode.make(qr_data)
-                    buffered = BytesIO()
-                    qr.save(buffered, format="PNG")
-                    qr_image = buffered.getvalue()
-
-                    # Send email with registration details and QR code
-                    try:
-                        # Setup the email content
-                        msg = MIMEMultipart()
-                        msg['From'] = EMAIL_ADDRESS
-                        msg['To'] = email
-                        msg['Subject'] = "Registration Confirmation"
-                        
-                        # Email body
-                        body = f"""<h2>Registration Confirmation</h2>
-                                   <p>Thank you, {name}, for registering.</p>
-                                   <p>Your Registration Number is: <strong>{registration_number}</strong></p>"""
-                        msg.attach(MIMEText(body, 'html'))
-
-                        # Attach QR Code image
-                        image = MIMEImage(qr_image)
-                        image.add_header('Content-ID', '<qrcode>')
-                        msg.attach(image)
-
-                        # Connect to the SMTP server and send email
-                        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-                            server.starttls()  # Enable TLS encryption
-                            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-                            server.send_message(msg)
-                        
-                        st.success("Registration successful! A confirmation email has been sent.")
-                    
-                    except Exception as e:
-                        st.error(f"Failed to send email: {e}")
+# Close the HTML div for the form
+st.markdown("</div></div>", unsafe_allow_html=True)
