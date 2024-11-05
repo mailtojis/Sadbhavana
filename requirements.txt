@@ -1,2 +1,2 @@
 streamlit
-smtplib
+smtplib0486
