@@ -1,9 +1,15 @@
 import streamlit as st
 
-# Embed custom CSS for the card layout
+# Embed custom CSS to style the page and form
 st.markdown(
     """
     <style>
+        /* Set background color for the entire page */
+        .stApp {
+            background-color: #F6F4E8;  /* Light blue background color */
+        }
+
+        /* Style for the card */
         .card {
             background: #ffffff;
             border-radius: 15px;
@@ -11,32 +17,76 @@ st.markdown(
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            margin-top: 50px; /* Add margin to separate card from top */
+            padding: 20px; /* Optional, to create some space around the card */
         }
+
+        /* Event image in the card */
         .card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
         }
+
+        /* Content inside the card */
         .card-content {
             padding: 20px;
+        }
+
+        /* Custom style for form labels to make them bold and change color */
+        .stTextInput label,
+        .stNumberInput label,
+        .stSelectbox label {
+            font-weight: bold;
+            color: #006064;  /* Dark blue color for the labels */
+        }
+
+        /* Style for the form inputs */
+        .stTextInput, .stNumberInput, .stSelectbox {
+            margin-top: 10px;
+            border: 1px solid #006064;  /* Dark blue border color */
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        /* Submit button */
+        .stButton button {
+            background-color: #00838f;  /* Dark cyan background for the button */
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        /* Optional: Style for error or success messages */
+        .stError, .stSuccess {
+            font-weight: bold;
+            color: #d32f2f;  /* Red color for error messages */
+        }
+
+        /* Custom Title Style */
+        .custom-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00796b;  /* Change to your desired color */
+            text-align: center;
         }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+# Custom Title with smaller size and different color
+st.markdown('<h3 class="custom-title">Register Below to Get Your Free Entry Pass</h3>', unsafe_allow_html=True)
  
 
-# Create a card with the event image and content
-st.markdown('<div class="card">', unsafe_allow_html=True)
-
 # Event Image
-st.image("./Image/eventPhoto.jpeg", width=700,use_column_width=False)
+st.image("./Image/eventPhoto.jpeg", width=700, use_column_width=False)
 
 # Card Content (Registration Form)
 with st.form("registration_form"):
     st.markdown('<div class="card-content">', unsafe_allow_html=True)
-    st.title("Registration Page")
-
+    
     # Form fields
     name = st.text_input("Full Name", max_chars=50)
     mobile = st.text_input("Mobile Number", max_chars=10)
