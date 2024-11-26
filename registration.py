@@ -1,98 +1,74 @@
 import streamlit as st
 
-# Embed custom CSS to style the page and form
+# Embed custom CSS to hide the footer and red Streamlit icon
 st.markdown(
     """
     <style>
-        /* Set background color for the entire page */
+        /* Hide the Streamlit footer (red icon) */
+        .css-1pbnwmo {
+            display: none;
+        }
+        
+        /* Set background color and padding for the entire app */
         .stApp {
-            background-color: #F6F4E8;  /* Light blue background color */
+            background-color: #E6F7FF;  /* Light blue background */
+            padding-top: 20px;  /* Add some space from the top */
         }
 
-        /* Style for the card */
-        .card {
-            background: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            margin-top: 50px; /* Add margin to separate card from top */
-            padding: 20px; /* Optional, to create some space around the card */
-        }
-
-        /* Event image in the card */
-        .card img {
+        /* Image styling for the event image */
+        .event-image {
             width: 100%;
-            height: 200px;
+            max-height: 400px;
             object-fit: cover;
         }
 
-        /* Content inside the card */
-        .card-content {
+        /* Custom styling for the registration form */
+        .registration-form {
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
             padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;  /* Space between image and form */
         }
 
-        /* Custom style for form labels to make them bold and change color */
-        .stTextInput label,
-        .stNumberInput label,
-        .stSelectbox label {
+        /* Style for the form fields and text */
+        .form-title {
+            color: #004C99;  /* Blue color for title */
+            font-size: 26px;
             font-weight: bold;
-            color: #006064;  /* Dark blue color for the labels */
         }
 
-        /* Style for the form inputs */
-        .stTextInput, .stNumberInput, .stSelectbox {
-            margin-top: 10px;
-            border: 1px solid #006064;  /* Dark blue border color */
-            padding: 5px;
-            border-radius: 5px;
+        .form-label {
+            font-weight: bold;
+            color: #004C99;  /* Matching color for labels */
         }
 
-        /* Submit button */
-        .stButton button {
-            background-color: #00838f;  /* Dark cyan background for the button */
+        .form-submit {
+            background-color: #004C99;
             color: white;
-            font-weight: bold;
-            padding: 10px 20px;
             border-radius: 5px;
-        }
-
-        /* Optional: Style for error or success messages */
-        .stError, .stSuccess {
-            font-weight: bold;
-            color: #d32f2f;  /* Red color for error messages */
-        }
-
-        /* Custom Title Style */
-        .custom-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #00796b;  /* Change to your desired color */
-            text-align: center;
+            padding: 10px;
+            font-size: 16px;
         }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Custom Title with smaller size and different color
-st.markdown('<h3 class="custom-title">Register Below to Get Your Free Entry Pass</h3>', unsafe_allow_html=True)
- 
+# Display the event image at the top
 
-# Event Image
-st.image("./Image/eventPhoto.jpeg", width=700, use_column_width=False)
+st.markdown('<h2 class="form-title">  Register Below to get your Free Entry Pass</h2>', unsafe_allow_html=True)
+st.image("./Image/eventPhoto.jpeg", use_column_width=True, output_format="JPEG")
 
-# Card Content (Registration Form)
-with st.form("registration_form"):
-    st.markdown('<div class="card-content">', unsafe_allow_html=True)
+# Registration form section
+with st.form("registration_form"): 
     
     # Form fields
     name = st.text_input("Full Name", max_chars=50)
     mobile = st.text_input("Mobile Number", max_chars=10)
     email = st.text_input("Email")
     emirates = st.selectbox("Select Emirate", ["", "Abu Dhabi", "Dubai", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah", "Umm Al Quwain"])
-
+    
     # Number of adults and kids fields in a single row
     col1_inner, col2_inner = st.columns(2)
     with col1_inner:
@@ -100,18 +76,14 @@ with st.form("registration_form"):
     with col2_inner:
         kids = st.number_input("Number of Kids", min_value=0, max_value=10, value=0, step=1)
 
-    submit_button = st.form_submit_button("Register")
+    submit_button = st.form_submit_button("Register", use_container_width=True)
     
     if submit_button:
         if not name or not mobile or not email or emirates == "":
             st.error("Please fill in all fields.")
-        elif not is_valid_email(email):
-            st.error("Please enter a valid email address.")
-        elif not is_valid_mobile(mobile):
+        elif len(mobile) != 10 or not mobile.isdigit():
             st.error("Mobile number should be exactly 10 digits.")
         else:
             st.success("Registration successful!")
     
     st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
