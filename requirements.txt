@@ -1,2 +1,5 @@
-streamlit
-qrcode[pil]
+streamlit as st
+qrcode
+smtplib 
+random
+re
