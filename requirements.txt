@@ -16,10 +16,7 @@ azure-identity==1.12.0
 azure-storage-blob==12.18.1
 beautifulsoup4==4.12.3
 blinker==1.8.2
-bqplot==0.12.43
-branca==0.7.2
-brotlipy @  
-bs4==0.0.2
+bqplot==0.12.43 
 cachetools==5.4.0
 certifi==2023.7.22
 cffi==1.15.1
